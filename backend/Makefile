@@ -8,7 +8,7 @@ install:
 
 # Run the FastAPI server
 run:
-	cd app && uvicorn main:app --reload
+	uvicorn main:app --reload
 
 # Format code using black
 format:
