@@ -8,7 +8,7 @@ install:
 
 # Run the FastAPI server
 run:
-	uvicorn main:app --reload
+	cd app && uvicorn main:app --reload
 
 # Format code using black
 format:
@@ -18,5 +18,9 @@ format:
 test:
 	pytest tests/
 
+# This script should have the env variables for the project
+local: 
+	. local_setup.sh
+
 # Phony targets
-.PHONY: install run format test
+.PHONY: install run format test local
