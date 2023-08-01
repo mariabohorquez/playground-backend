@@ -35,7 +35,6 @@ async def create_user(payload: CreateUserSchema):
     #  Hash the password
     payload.password = hash_password(payload.password)
     del payload.passwordConfirm
-    payload.role = "user"
     payload.verified = True
     payload.email = payload.email.lower()
     payload.created_at = datetime.utcnow()
