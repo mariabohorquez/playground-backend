@@ -1,40 +1,14 @@
-from bson import ObjectId
-from config.db import collection
-from fastapi import APIRouter
-from models.user import User
-from schemas.user import users_serializer
+from bson.objectid import ObjectId
+from fastapi import APIRouter, Depends
 
-user = APIRouter()
+import config.oauth2 as oauth2
+from config.db import User
+from schemas.user import UserResponse, userResponseEntity
 
-
-@user.get("/")
-async def find_all_users():
-    users = users_serializer(collection.find())
-    return {"status": "Ok", "data": users}
+router = APIRouter()
 
 
-@user.get("/{id}")
-async def get_one_user(id: str):
-    user = users_serializer(collection.find({"_id": ObjectId(id)}))
-    return {"status": "Ok", "data": user}
-
-
-@user.post("/")
-async def create_user(user: User):
-    _id = collection.insert_one(dict(user))
-    user = users_serializer(collection.find({"_id": _id.inserted_id}))
-    return {"status": "Ok", "data": user}
-
-
-@user.put("/{id}")
-async def update_user(id: str, user: User):
-    collection.find_one_and_update({"_id": ObjectId(id)}, {"$set": dict(user)})
-    user = users_serializer(collection.find({"_id": ObjectId(id)}))
-    return {"status": "Ok", "data": user}
-
-
-@user.delete("/{id}")
-async def delete_user(id: str):
-    collection.find_one_and_delete({"_id": ObjectId(id)})
-    users_serializer(collection.find())
-    return {"status": "Ok", "data": []}
+@router.get("/me", response_model=UserResponse)
+def get_me(user_id: str = Depends(oauth2.require_user)):
+    user = userResponseEntity(User.find_one({"_id": ObjectId(str(user_id))}))
+    return {"status": "success", "user": user}

@@ -1,16 +1,19 @@
 import os
-from typing import Union
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from pymongo import MongoClient
-from routes.user import user
+from routes import user, auth
+
+# from typing import Union
+
 
 load_dotenv()
 app = FastAPI()
 
 # routes with prefixes
-app.include_router(user, prefix="/user", tags=["user"])
+app.include_router(user.router, prefix="/user", tags=["user"])
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 
 # events
@@ -28,12 +31,12 @@ def shutdown_db_client():
     app.mongodb_client.close()
 
 
-# routes
+# default routes
 @app.get("/")
 async def read_root():
     return {"Health": "Ok"}
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+# @app.get("/items/{item_id}")
+# async def read_item(item_id: int, q: Union[str, None] = None):
+#     return {"item_id": item_id, "q": q}

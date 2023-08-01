@@ -6,6 +6,6 @@ Repositorio para el proyecto final de ingenieria.
 
 ###  Como correr
 
-`make install && make run`
+`make local && make install && make run`
 
 El servidor estara corriendo en: http://127.0.0.1:8000
