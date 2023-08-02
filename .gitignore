@@ -1,4 +1,6 @@
 __pycache__
 app.egg-info
 .venv
+.env
+/venv
 local_setup.sh
