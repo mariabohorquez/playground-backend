@@ -18,3 +18,5 @@ except Exception:
 db = client["playground"]
 User = db["users"]
 User.create_index([("email", ASCENDING)], unique=True)
+Character = db["characters"]
+Character.create_index([("name", ASCENDING)], unique=True)

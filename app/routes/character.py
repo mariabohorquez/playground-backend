@@ -1,5 +1,5 @@
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 
 from models.character import CharacterModel
 
@@ -7,10 +7,10 @@ from models.character import CharacterModel
 router = APIRouter()
 
 @router.post('/create')
-async def create_character(character : CharacterModel):
+async def create_character(character : CharacterModel = Body(...)):
     return {"status" : "success", "character" : ""}
 
-@router.get('/{userId}', description="Get characters from an account")
+@router.get('/{userId}', response_description="Get a list of characters from an account")
 async def get_user_chars(userId : str):
     return {"status" : "success",
             "characters " : ""}
