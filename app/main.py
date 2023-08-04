@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from pymongo import MongoClient
-from routes import user, auth
+from routes import user, auth, character
 
 # from typing import Union
 
@@ -14,7 +14,7 @@ app = FastAPI()
 # routes with prefixes
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-
+app.include_router(character.router, prefix="/character", tags=["character"])
 
 # events
 @app.on_event("startup")
