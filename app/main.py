@@ -3,13 +3,13 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from pymongo import MongoClient
+from config.db import Settings
 from routes import user, auth, character
 
 # from typing import Union
-
-
 load_dotenv()
 app = FastAPI()
+settings = Settings()
 
 # routes with prefixes
 app.include_router(user.router, prefix="/user", tags=["user"])
@@ -18,18 +18,14 @@ app.include_router(character.router, prefix="/character", tags=["character"])
 
 # events
 @app.on_event("startup")
-def startup_db_client():
-    CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
-    if not CONNECTION_STRING:
-        raise Exception("COSMOS_CONNECTION_STRING environment variable not set")
-    app.mongodb_client = MongoClient(CONNECTION_STRING)
-    app.database = app.mongodb_client["playground"]
-
+async def startup_db_client():
+   client = await settings.initialize_database()
+   app.mongodb_client = client
+   app.database = client[settings.DATABASE_NAME]
 
 @app.on_event("shutdown")
-def shutdown_db_client():
-    app.mongodb_client.close()
-
+async def shutdown_db_client():
+  await app.mongodb_client.close()
 
 # default routes
 @app.get("/")

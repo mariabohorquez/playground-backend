@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post('/create')
 async def create_character(character : CharacterModel = Body(...)):
+    new_char = await character.insert()
     return {"status" : "success", "character" : ""}
 
 @router.get('/{userId}', response_description="Get a list of characters from an account")
