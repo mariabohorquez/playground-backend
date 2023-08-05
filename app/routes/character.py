@@ -2,7 +2,7 @@ from webbrowser import Opera
 from beanie import DeleteRules, PydanticObjectId
 from fastapi import APIRouter, Body, HTTPException
 from fastapi import HTTPException, status
-from models.character import Character, CharacterResponse, CreateCharacter, DeleteCharacterResponse, UpdateCharacter, UserCharactersResponse
+from models.character import Character, CharacterDataResponse, CharacterResponse, CreateCharacter, DeleteCharacterResponse, UpdateCharacter, UserCharactersResponse
 from models.user import User
 import beanie.odm.operators.update.array as ArrayOperators
 import beanie.odm.operators.update.general as GenericOperators
@@ -26,6 +26,23 @@ async def create_character(userId : PydanticObjectId, payload: CreateCharacter):
     await user.save() 
     new_character = CharacterResponse.parse_obj(new_char)
     return new_character
+
+
+@router.get(
+        "/{characterId}",
+        response_description="Get a character data",
+        response_model=CharacterDataResponse
+)
+async def get_character(characterId : PydanticObjectId):
+    character = await Character.get(characterId)
+
+    if not character:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Character with id {characterId} not found"
+        )
+
+    return CharacterDataResponse(data=character)
 
 @router.get(
     "/{userId}", 

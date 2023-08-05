@@ -54,6 +54,10 @@ class DeleteCharacterResponse(BaseModel):
      id : PydanticObjectId
      status : str = "success"
 
+class CharacterDataResponse(BaseModel):
+     data : Character
+     status : str = "success"
+
 class UserCharactersResponse(BaseModel):
      data : List[Character]
      status : str = "success"
