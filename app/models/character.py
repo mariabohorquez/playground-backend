@@ -1,6 +1,7 @@
+from ast import Delete
 from typing import List, Optional
 
-from beanie import Document, Indexed, PydanticObjectId
+from beanie import Document, Indexed, PydanticObjectId, after_event
 from click import Option
 from pydantic import BaseModel
 
@@ -38,7 +39,16 @@ class UpdateCharacter(BaseModel):
     description: Optional[str] = None
     traits: Optional[List[str]] = None
     image: Optional[str] = None
-
+    
+    class Config:
+            schema_extra = {
+                "example": {
+                    "name": "Thanatos",
+                    "description": "The god of death",
+                    "traits": ["Darker, Evil"],
+                    "image": "",
+                }
+            }
 
 class CharacterResponse(CharacterBase):
     id: PydanticObjectId
