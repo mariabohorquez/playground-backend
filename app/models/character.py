@@ -1,10 +1,7 @@
-from ast import Delete
 from typing import List, Optional
 
-from beanie import Document, Indexed, PydanticObjectId, after_event
-from click import Option
+from beanie import Document, Indexed, PydanticObjectId
 from pydantic import BaseModel
-
 
 class Character(Document):
     name: Indexed(str, unique=True)
@@ -14,7 +11,6 @@ class Character(Document):
 
     class Settings:
         name = "characters"
-
     
 
 class CharacterBase(BaseModel):
@@ -53,6 +49,10 @@ class UpdateCharacter(BaseModel):
 class CharacterResponse(CharacterBase):
     id: PydanticObjectId
     status: str = "success"
+
+class DeleteCharacterResponse(BaseModel):
+     id : PydanticObjectId
+     status : str = "success"
 
 class UserCharactersResponse(BaseModel):
      data : List[Character]

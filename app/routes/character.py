@@ -1,20 +1,23 @@
-from beanie import PydanticObjectId
+from webbrowser import Opera
+from beanie import DeleteRules, PydanticObjectId
 from fastapi import APIRouter, Body, HTTPException
 from fastapi import HTTPException, status
-from models.character import Character, CharacterResponse, CreateCharacter, UpdateCharacter, UserCharactersResponse
+from models.character import Character, CharacterResponse, CreateCharacter, DeleteCharacterResponse, UpdateCharacter, UserCharactersResponse
 from models.user import User
+import beanie.odm.operators.update.array as ArrayOperators
+import beanie.odm.operators.update.general as GenericOperators
 
 router = APIRouter()
 
 
 @router.post("/create/{userId}")
-async def create_character(userId : PydanticObjectId, payload: CreateCharacter = Body(...)):
+async def create_character(userId : PydanticObjectId, payload: CreateCharacter):
     user = await User.get(userId)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=f"User with id: {userId} not found"
         )
     
     character = Character.parse_obj(payload)
@@ -36,7 +39,7 @@ async def get_user_chars(userId : PydanticObjectId):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with id {userId} not found"
+            detail=f"User with id {userId} not found"
         )
     
     print(user)
@@ -49,13 +52,13 @@ async def get_user_chars(userId : PydanticObjectId):
     response_description="Update Character Data",
     response_model=CharacterResponse,
 )
-async def update_character_data(characterId : PydanticObjectId, payload : UpdateCharacter = Body(...)):
+async def update_character(characterId : PydanticObjectId, payload : UpdateCharacter = Body(...)):
     character = await Character.get(characterId)
 
     if not character:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Character with {characterId} not found"
+            detail=f"Character with {characterId} not found"
         )
     
     req = {k: v for k, v in payload.dict().items() if v is not None}
@@ -68,3 +71,44 @@ async def update_character_data(characterId : PydanticObjectId, payload : Update
     return response
 
 
+@router.delete(
+    "/{characterId}/{userId}",
+    response_description="Delete a character",
+    response_model=DeleteCharacterResponse
+)
+async def delete_character(userId : PydanticObjectId, characterId : PydanticObjectId):
+
+    user = await User.get(userId)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {userId} not found"
+        )
+
+    character = await Character.get(characterId)
+
+    if not character:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Character with id: {characterId} not found"
+        )
+    
+    await user.fetch_all_links()
+
+    character = None
+    for item in user.characters:
+        if item.id == characterId:
+            character = item
+
+    if character:
+        user.characters.remove(character)
+        await character.delete()
+        result = await user.save()
+        return DeleteCharacterResponse(id=characterId)
+
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Error in delete character process"
+    )
