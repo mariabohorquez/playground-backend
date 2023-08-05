@@ -15,7 +15,7 @@ REFRESH_TOKEN_EXPIRES_IN = 60
     status_code=status.HTTP_201_CREATED,
     response_model=UserResponse,
 )
-async def create_user(payload: User):
+async def create_user(payload: CreateUser):
     # Check if user already exist
     user = await User.find_one({"email": payload.email.lower()})
     if user:
@@ -25,7 +25,7 @@ async def create_user(payload: User):
     #  Hash the password
     payload.password = hash_password(payload.password)
     payload.email = payload.email.lower()
-    result = await payload.create()
+    result = await User.parse_obj(payload).create()
     new_user = UserResponse.parse_obj(result)
     return new_user
 
