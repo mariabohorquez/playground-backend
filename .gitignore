@@ -4,3 +4,4 @@ app.egg-info
 .env
 /venv
 local_setup.sh
+.pytest_cache

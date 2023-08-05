@@ -1,8 +1,6 @@
-from bson.objectid import ObjectId
-from fastapi import APIRouter, Depends
-
 import config.oauth2 as oauth2
-from schemas.user import UserResponse, userResponseEntity
+from fastapi import APIRouter, Depends
+from models.user import UserResponse
 
 router = APIRouter()
 

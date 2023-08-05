@@ -1,35 +1,27 @@
 import os
-from pickle import FALSE
-from typing import Any, Optional
-from beanie import PydanticObjectId, init_beanie
-from click import Option
 
+from beanie import init_beanie
 from dotenv import load_dotenv
-from pydantic import BaseSettings
-from pymongo import ASCENDING, MongoClient
+from models.character import Character
+from models.user import User
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseSettings
 
-from models.character import CharacterModel
+load_dotenv()
+
 
 class Settings(BaseSettings):
-    DATABASE_URL : Optional[str] = None
-    DATABASE_NAME : Optional[str] = None
-
     async def initialize_database(self):
         try:
-          client = AsyncIOMotorClient(self.DATABASE_URL)
-          conn = await client.server_info()
-          print(conn)
-          print(f'Connected to MongoDB {conn.get("version")}')
-          await init_beanie(
-              database=client[self.DATABASE_NAME],
-              document_models=[CharacterModel]
-          )
-          return client
+            client = AsyncIOMotorClient(os.environ.get("COSMOS_CONNECTION_STRING"))
+            conn = await client.server_info()
+            print(f'Connected to MongoDB {conn.get("version")}')
+            await init_beanie(
+                database=client["playground"], document_models=[Character, User]
+            )
+            return client
         except Exception as error:
-            print(error)
-            print("Unable to connect to the MongoDB server.")
+            print(f"Unable to connect to the MongoDB server with error: {error}.")
 
     class Config:
         env_file = ".env"
-

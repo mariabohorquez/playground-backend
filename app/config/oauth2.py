@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi_jwt_auth import AuthJWT
+from models.user import User
 from pydantic import BaseModel
 
 load_dotenv()
@@ -14,17 +15,18 @@ JWT_PRIVATE_KEY = os.environ.get("JWT_PRIVATE_KEY")
 
 class Settings(BaseModel):
     authjwt_algorithm: str = "RS256"
-    authjwt_token_location: set = {'cookies', 'headers'}
-    authjwt_access_cookie_key: str = 'access_token'
-    authjwt_refresh_cookie_key: str = 'refresh_token'
+    authjwt_token_location: set = {"cookies", "headers"}
+    authjwt_access_cookie_key: str = "access_token"
+    authjwt_refresh_cookie_key: str = "refresh_token"
     authjwt_cookie_csrf_protect: bool = False
-    authjwt_public_key: str = base64.b64decode(JWT_PUBLIC_KEY).decode('utf-8')
-    authjwt_private_key: str = base64.b64decode(JWT_PRIVATE_KEY).decode('utf-8')
+    authjwt_public_key: str = base64.b64decode(JWT_PUBLIC_KEY).decode("utf-8")
+    authjwt_private_key: str = base64.b64decode(JWT_PRIVATE_KEY).decode("utf-8")
 
 
 @AuthJWT.load_config
 def get_config():
     return Settings()
+
 
 class NotVerified(Exception):
     pass
@@ -38,26 +40,32 @@ def require_user(Authorize: AuthJWT = Depends()):
     try:
         Authorize.jwt_required()
         user_id = Authorize.get_jwt_subject()
-        user = userEntity(User.find_one({'_id': ObjectId(str(user_id))}))
+        user = User.get(user_id)
 
         if not user:
-            raise UserNotFound('User no longer exist')
+            raise UserNotFound("User no longer exists")
 
         if not user["verified"]:
-            raise NotVerified('You are not verified')
+            raise NotVerified("You are not verified")
 
     except Exception as e:
         error = e.__class__.__name__
         print(error)
-        if error == 'MissingTokenError':
+        if error == "MissingTokenError":
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail='You are not logged in')
-        if error == 'UserNotFound':
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not logged in"
+            )
+        if error == "UserNotFound":
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail='User no longer exist')
-        if error == 'NotVerified':
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="User no longer exists"
+            )
+        if error == "NotVerified":
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail='Please verify your account')
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Please verify your account",
+            )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid or has expired')
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is invalid or has expired",
+        )
     return user_id
