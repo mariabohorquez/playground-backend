@@ -1,7 +1,7 @@
 from config.db import Settings
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from routes import auth, character, user
+from routes import auth, character, user, worldbuilding
 
 load_dotenv()
 settings = Settings()
@@ -13,7 +13,7 @@ app = FastAPI()
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(character.router, prefix="/character", tags=["character"])
-
+app.include_router(worldbuilding.router, prefix="/worldbuilding", tags=["worldbuilding"])
 
 # events
 @app.on_event("startup")

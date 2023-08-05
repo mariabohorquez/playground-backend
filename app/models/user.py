@@ -1,5 +1,4 @@
 from typing import List, Optional
-from xmlrpc.client import Boolean, boolean
 
 from beanie import Document, Indexed, Link, PydanticObjectId
 from click import Option
@@ -15,6 +14,7 @@ class User(Document):
     photo: Optional[str]
     password: str
     characters : Optional[List[Link[Character]]] = []
+    world_building : Optional[str] = None
 
     class Settings:
         name = "users"
@@ -74,6 +74,13 @@ class LoginUser(BaseModel):
     password: constr(min_length=8)
 
 
+class UpdateWorldBuilding(BaseModel):
+    text : Optional[str]
+
 class UserResponse(UserBase):
     id: PydanticObjectId
     status: str = "success"
+
+class WorldBuildingResponse(BaseModel):
+    data : str
+    status : str = "success"
