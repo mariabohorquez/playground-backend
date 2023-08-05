@@ -1,7 +1,11 @@
-from typing import Optional
+from typing import List, Optional
+from xmlrpc.client import Boolean, boolean
 
-from beanie import Document, Indexed, PydanticObjectId
+from beanie import Document, Indexed, Link, PydanticObjectId
+from click import Option
 from pydantic import BaseModel, EmailStr, constr
+
+from models.character import Character
 
 
 class User(Document):
@@ -10,12 +14,18 @@ class User(Document):
     email: Indexed(str, unique=True)
     photo: Optional[str]
     password: str
+    characters : Optional[List[Link[Character]]] = []
 
     class Settings:
         name = "users"
 
     class Config:
-        schema_extra = {"example": {"name": "John Doe", "email": "The god of death"}}
+        schema_extra = {
+            "example": {
+                "name": "John Doe", 
+                "email": "john@gmail.com",
+                "password" : "argentina12"
+        }}
 
     def __str__(self) -> str:
         return self.email
@@ -39,12 +49,18 @@ class UserBase(BaseModel):
     email: EmailStr
     photo: Optional[str]
     password: str
-
+    characters : List[Link[Character]] = []
+    first_login : bool = False
 
 class CreateUser(UserBase):
-    password: constr(min_length=8)
-    passwordConfirm: str
-    verified: bool = False
+
+    class Config:
+      schema_extra = {
+          "example": {
+              "name": "John Doe", 
+              "email": "john@gmail.com",
+              "password" : "argentina12"
+      }}
 
 
 class UpdateUser(BaseModel):

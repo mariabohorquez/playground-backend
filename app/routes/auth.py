@@ -15,24 +15,17 @@ REFRESH_TOKEN_EXPIRES_IN = 60
     status_code=status.HTTP_201_CREATED,
     response_model=UserResponse,
 )
-async def create_user(payload: CreateUser):
+async def create_user(payload: User):
     # Check if user already exist
     user = await User.find_one({"email": payload.email.lower()})
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Account already exists"
         )
-    # Compare password and passwordConfirm
-    if payload.password != payload.passwordConfirm:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match"
-        )
     #  Hash the password
     payload.password = hash_password(payload.password)
-    del payload.passwordConfirm
-    payload.verified = True
     payload.email = payload.email.lower()
-    result = await User.parse_obj(payload).save()
+    result = await payload.create()
     new_user = UserResponse.parse_obj(result)
     return new_user
 
