@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-from beanie import Document, Indexed
+from beanie import Document, Indexed, PydanticObjectId
+from click import Option
 from pydantic import BaseModel
 
 
@@ -13,6 +14,15 @@ class Character(Document):
     class Settings:
         name = "characters"
 
+    
+
+class CharacterBase(BaseModel):
+    name: str
+    description: str
+    traits: List[str] = []
+    image: Optional[str] = None
+
+class CreateCharacter(CharacterBase):
     class Config:
         schema_extra = {
             "example": {
@@ -23,9 +33,13 @@ class Character(Document):
             }
         }
 
-
 class UpdateCharacter(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     traits: Optional[List[str]] = None
     image: Optional[str] = None
+
+
+class CharacterResponse(CharacterBase):
+    id: PydanticObjectId
+    status: str = "success"
