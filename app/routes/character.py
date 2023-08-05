@@ -1,7 +1,7 @@
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, HTTPException
 from fastapi import HTTPException, status
-from models.character import Character, CharacterResponse, CreateCharacter, UpdateCharacter
+from models.character import Character, CharacterResponse, CreateCharacter, UpdateCharacter, UserCharactersResponse
 from models.user import User
 
 router = APIRouter()
@@ -25,10 +25,24 @@ async def create_character(userId : PydanticObjectId, payload: CreateCharacter =
     return new_character
 
 @router.get(
-    "/{userId}", response_description="Get a list of characters from an account"
+    "/{userId}", 
+    response_description="Get a list of characters from an account",
+    response_model=UserCharactersResponse
 )
-async def get_user_chars(userId: str):
-    return {"status": "success", "characters ": ""}
+async def get_user_chars(userId : PydanticObjectId):
+
+    user = await User.find_one(User.id == userId, fetch_links=True)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User with id {userId} not found"
+        )
+    
+    print(user)
+
+    return UserCharactersResponse(data=user.characters, status="successful")
+
 
 @router.put(
     "/{characterId}",

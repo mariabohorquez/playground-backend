@@ -53,3 +53,7 @@ class UpdateCharacter(BaseModel):
 class CharacterResponse(CharacterBase):
     id: PydanticObjectId
     status: str = "success"
+
+class UserCharactersResponse(BaseModel):
+     data : List[Character]
+     status : str = "success"
