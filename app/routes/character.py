@@ -1,3 +1,4 @@
+from ast import For
 from turtle import width
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, HTTPException
@@ -5,7 +6,7 @@ from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from models.character import Character, CharacterDataResponse, CharacterResponse, CreateCharacter, DeleteCharacterResponse, UpdateCharacter, UserCharactersResponse
 from models.user import User
-from typing import List
+from typing import Annotated, List
 
 # Image packages
 import os
@@ -30,11 +31,11 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED
 )
 async def create_character(
-    userId : PydanticObjectId = Form("userId"),
-    name : str = Form("name"),
-    description : str = Form("description"),
-    traits : str = Form("traits"),
-    image : UploadFile = File(...),
+    userId : Annotated[PydanticObjectId, Form(default=...)],
+    name : Annotated[str, Form(default=...)],
+    description : Annotated[str, Form(default=...)],
+    traits : Annotated[str, Form(default=...)],
+    image : UploadFile = File(...)
 ):
     user = await User.get(userId)
 
