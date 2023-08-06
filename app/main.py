@@ -2,12 +2,27 @@ from config.db import Settings
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from routes import auth, character, user, worldbuilding
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 settings = Settings()
 
 # FastAPI app
 app = FastAPI()
+origins = [
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # routes with prefixes
 app.include_router(user.router, prefix="/user", tags=["user"])
