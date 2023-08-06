@@ -44,11 +44,17 @@ async def create_character(
             detail=f"User with id: {userId} not found"
         )
 
-    result = cloudinary.uploader.upload(
-        image.file,
-        folder="playground",
-    )
-
+    try:
+          result = cloudinary.uploader.upload(
+          image.file,
+          folder="playground",
+      )
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error uploading image: {error}"
+        )
+        
     img_url = result.get("url")
 
     character = Character(
