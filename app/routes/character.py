@@ -1,17 +1,41 @@
-from webbrowser import Opera
-from beanie import DeleteRules, PydanticObjectId
+from turtle import width
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, HTTPException
 from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
 from models.character import Character, CharacterDataResponse, CharacterResponse, CreateCharacter, DeleteCharacterResponse, UpdateCharacter, UserCharactersResponse
 from models.user import User
-import beanie.odm.operators.update.array as ArrayOperators
-import beanie.odm.operators.update.general as GenericOperators
+from typing import List
+
+# Image packages
+import os
+from dotenv import load_dotenv
+import cloudinary
+import cloudinary.uploader
+from fastapi import UploadFile, File, Form
+
+load_dotenv()
+
+cloudinary.config(
+    cloud_name = os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key= os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret= os.environ.get("CLOUDINARY_API_SECRET")
+)
 
 router = APIRouter()
 
-
-@router.post("/create/{userId}")
-async def create_character(userId : PydanticObjectId, payload: CreateCharacter):
+@router.post(
+    "/create",
+    response_description="Create character with picture",
+    status_code=status.HTTP_201_CREATED
+)
+async def create_character(
+    userId : PydanticObjectId = Form("userId"),
+    name : str = Form("name"),
+    description : str = Form("description"),
+    traits : str = Form("traits"),
+    image : UploadFile = File(...),
+):
     user = await User.get(userId)
 
     if not user:
@@ -19,14 +43,27 @@ async def create_character(userId : PydanticObjectId, payload: CreateCharacter):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with id: {userId} not found"
         )
-    
-    character = Character.parse_obj(payload)
-    new_char = await character.create()
-    user.characters.append(new_char)
-    await user.save() 
-    new_character = CharacterResponse.parse_obj(new_char)
-    return new_character
 
+    result = cloudinary.uploader.upload(
+        image.file,
+        folder="playground",
+    )
+
+    img_url = result.get("url")
+
+    character = Character(
+        name = name,
+        description= description,
+        traits=traits.split(','),
+        image=img_url
+    )
+
+    char_result = await character.create()
+
+    user.characters.append(char_result)
+    await user.save()
+
+    return char_result
 
 @router.get(
         "/{characterId}",
