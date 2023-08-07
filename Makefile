@@ -18,9 +18,5 @@ format:
 test:
 	pytest tests/
 
-# This script should have the env variables for the project
-local: 
-	. local_setup.sh
-
 # Phony targets
 .PHONY: install run format test local

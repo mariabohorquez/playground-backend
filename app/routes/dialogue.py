@@ -1,41 +1,35 @@
+import os
+
+import openai
+from typing import Annotated
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, HTTPException, openapi, status
+from config import oauth2
+from models.dialogue import DialogueResponse
 from models.user import UpdateWorldBuilding, User, WorldBuildingResponse
 
 router = APIRouter()
 
+load_dotenv()
 
-@router.get(
-    "/{userId}",
-    response_description="Get the current World building",
-    response_model=WorldBuildingResponse,
-)
-async def get_world_building(userId: PydanticObjectId):
-    user = await User.get(userId)
+OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {userId} not found",
-        )
-
-    return WorldBuildingResponse(data=user.world_building)
+def get_openai_response(current_user):
+    openai.api_key = OPENAI_KEY
+    return openai.Model.list()
 
 
-@router.put(
-    "/{userId}",
-    response_description="Update the World building",
-    status_code=status.HTTP_200_OK,
-)
-async def update_world_building(userId: PydanticObjectId, payload: UpdateWorldBuilding):
-    user = await User.get(userId)
+@router.get("/generate", response_model=DialogueResponse)
+async def generate(current_user: Annotated[User, Depends(oauth2.get_current_user)], model: str):
+    if model == "openai":
+        response = get_openai_response(current_user)
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {userId} not found",
-        )
+    if model == "custom":
+        # TODO: Implement custom model
+        pass
 
-    user.world_building = payload.text
-
-    await user.save()
+    return DialogueResponse(
+        data=response,
+        status_code=status.HTTP_200_OK
+    )

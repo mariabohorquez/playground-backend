@@ -6,6 +6,7 @@
   "python.testing.pytestEnabled": true,
   "python.analysis.extraPaths": [
     ".venv",
+    "./app",
     "./app"
   ]
 }
