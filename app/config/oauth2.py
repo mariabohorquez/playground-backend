@@ -1,71 +1,60 @@
-import base64
 import os
+from datetime import datetime, timedelta
+from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
-from fastapi_jwt_auth import AuthJWT
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from models.token import TokenData
 from models.user import User
-from pydantic import BaseModel
+from passlib.context import CryptContext
 
 load_dotenv()
 
-JWT_PUBLIC_KEY = os.environ.get("JWT_PUBLIC_KEY")
 JWT_PRIVATE_KEY = os.environ.get("JWT_PRIVATE_KEY")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 3600
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-class Settings(BaseModel):
-    authjwt_algorithm: str = "RS256"
-    authjwt_token_location: set = {"cookies", "headers"}
-    authjwt_access_cookie_key: str = "access_token"
-    authjwt_refresh_cookie_key: str = "refresh_token"
-    authjwt_cookie_csrf_protect: bool = False
-    authjwt_public_key: str = base64.b64decode(JWT_PUBLIC_KEY).decode("utf-8")
-    authjwt_private_key: str = base64.b64decode(JWT_PRIVATE_KEY).decode("utf-8")
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, JWT_PRIVATE_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 
-@AuthJWT.load_config
-def get_config():
-    return Settings()
-
-
-class NotVerified(Exception):
-    pass
-
-
-class UserNotFound(Exception):
-    pass
-
-
-def require_user(Authorize: AuthJWT = Depends()):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
-        Authorize.jwt_required()
-        user_id = Authorize.get_jwt_subject()
-        user = User.get(user_id)
+        payload = jwt.decode(token, JWT_PRIVATE_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = await User.by_email(token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
 
-        if not user:
-            raise UserNotFound("User no longer exists")
 
-        if not user["verified"]:
-            raise NotVerified("You are not verified")
-
-    except Exception as e:
-        error = e.__class__.__name__
-        print(error)
-        if error == "MissingTokenError":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not logged in"
-            )
-        if error == "UserNotFound":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="User no longer exists"
-            )
-        if error == "NotVerified":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Please verify your account",
-            )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is invalid or has expired",
-        )
-    return user_id
+async def get_current_active_user(
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
