@@ -8,8 +8,9 @@ from beanie import PydanticObjectId
 from dotenv import load_dotenv
 from fastapi import (APIRouter, Body, File, Form, HTTPException, UploadFile,
                      status)
+from fastapi.encoders import jsonable_encoder
 from models.character import (Character, CharacterDataResponse,
-                              CharacterResponse, DeleteCharacterResponse,
+                              CharacterResponse, DeleteCharacterBody, DeleteCharacterResponse,
                               UpdateCharacter, UserCharactersResponse)
 from models.user import User
 
@@ -34,28 +35,29 @@ async def create_character(
     name: Annotated[str, Form(default=...)],
     description: Annotated[str, Form(default=...)],
     traits: Annotated[str, Form(default=...)],
-    image: UploadFile = File(...),
+    image: UploadFile = File(default=None)
 ):
     user = await User.get(userId)
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with id: {userId} not found",
         )
 
-    try:
+    img_url = ""
+    if (image != None):
+      try:
         result = cloudinary.uploader.upload(
             image.file,
             folder="playground",
         )
-    except Exception as error:
+      except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error uploading image: {error}",
         )
+      img_url = result.get("url")
 
-    img_url = result.get("url")
 
     character = Character(
         name=name, description=description, traits=traits.split(","), image=img_url
@@ -87,7 +89,7 @@ async def get_character(characterId: PydanticObjectId):
 
 
 @router.get(
-    "/{userId}",
+    "/list/{userId}",
     response_description="Get a list of characters from an account",
     response_model=UserCharactersResponse,
 )
@@ -100,9 +102,11 @@ async def get_user_chars(userId: PydanticObjectId):
             detail=f"User with id {userId} not found",
         )
 
-    print(user)
+    chars = []
+    for char in user.characters:
+        chars.append(jsonable_encoder(char))
 
-    return UserCharactersResponse(data=user.characters, status="successful")
+    return UserCharactersResponse(chars=chars, status="successful")
 
 
 @router.put(
@@ -130,11 +134,12 @@ async def update_character(
 
 
 @router.delete(
-    "/{characterId}/{userId}",
+    "/{characterId}",
     response_description="Delete a character",
     response_model=DeleteCharacterResponse,
 )
-async def delete_character(userId: PydanticObjectId, characterId: PydanticObjectId):
+async def delete_character(characterId: PydanticObjectId, payload : DeleteCharacterBody):
+    userId = payload.userId
     user = await User.get(userId)
 
     if not user:
