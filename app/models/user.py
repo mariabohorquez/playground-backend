@@ -11,7 +11,7 @@ class User(Document):
     photo: Optional[str]
     password: str
     characters: Optional[List[Link[Character]]] = []
-    world_building: Optional[str] = None
+    world_building: Optional[str] = ""
 
     class Settings:
         name = "users"
