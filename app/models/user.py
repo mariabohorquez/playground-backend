@@ -2,8 +2,7 @@ from typing import List, Optional
 
 from beanie import Document, Indexed, Link, PydanticObjectId
 from models.character import Character
-from pydantic import BaseModel, EmailStr, constr
-
+from pydantic import BaseModel, EmailStr, Field, constr
 
 class User(Document):
     "User DB Representation"
@@ -73,6 +72,13 @@ class LoginUser(BaseModel):
     email: EmailStr
     password: constr(min_length=8)
 
+class LoggedUserResponse(BaseModel):
+    id : str
+    name : str
+    email : str
+    photo : Optional[str]
+    characters : Optional[List[str]] = []
+    world_building : Optional[str] = ''
 
 class UpdateWorldBuilding(BaseModel):
     text: Optional[str]
@@ -84,5 +90,5 @@ class UserResponse(UserBase):
 
 
 class WorldBuildingResponse(BaseModel):
-    data: str
+    worldbuilding: str
     status: str = "success"

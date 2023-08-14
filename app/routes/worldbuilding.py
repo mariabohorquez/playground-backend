@@ -19,7 +19,7 @@ async def get_world_building(userId: PydanticObjectId):
             detail=f"User with id {userId} not found",
         )
 
-    return WorldBuildingResponse(data=user.world_building)
+    return WorldBuildingResponse(worldbuilding=user.world_building)
 
 
 @router.put(
