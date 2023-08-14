@@ -1,12 +1,14 @@
 from datetime import timedelta
 from typing import Annotated
 
+from fastapi.encoders import jsonable_encoder
+
 from config.oauth2 import create_access_token
 from config.utils import hash_password, verify_password
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from models.token import Token
-from models.user import CreateUser, User, UserResponse
+from models.user import CreateUser, LoggedUserResponse, User, UserResponse
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 3600
 
@@ -44,23 +46,22 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = UserResponse.parse_obj(db_user)
 
-    # Check if the password is valid
-    if not verify_password(form_data.password, user.password):
+    if not verify_password(form_data.password, db_user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect Email or Password",
         )
 
     # Create access token
+    user = jsonable_encoder(db_user, exclude={"password"})
+    print(user)
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        data={"sub": db_user.email}, expires_delta=access_token_expires
     )
 
-    # Send both access
-    return {"access_token": access_token, "token_type": "bearer"}
+    return Token(access_token=access_token, token_type="bearer", user=user)
 
 
 @router.get("/logout", status_code=status.HTTP_200_OK)
