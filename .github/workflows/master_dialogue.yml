@@ -5,10 +5,8 @@
 name: Build and deploy Python app to Azure Web App - dialogue
 
 on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build:
