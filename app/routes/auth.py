@@ -53,13 +53,13 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         )
 
     # Create access token
-    user = jsonable_encoder(db_user, exclude={"password"})
+    parsed_user = jsonable_encoder(obj=db_user,exclude={"password", "characters"})
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": db_user.email}, expires_delta=access_token_expires
     )
 
-    return Token(access_token=access_token, token_type="bearer", user=user)
+    return Token(access_token=access_token, token_type="bearer", user=parsed_user)
 
 
 @router.get("/logout", status_code=status.HTTP_200_OK)

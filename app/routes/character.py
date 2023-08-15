@@ -104,7 +104,7 @@ async def get_user_chars(userId: PydanticObjectId):
 
     chars = []
     for char in user.characters:
-        chars.append(jsonable_encoder(char))
+        chars.append(jsonable_encoder(obj=char))
 
     return UserCharactersResponse(chars=chars, status="successful")
 
