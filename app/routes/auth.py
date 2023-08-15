@@ -1,14 +1,13 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi.encoders import jsonable_encoder
-
 from config.oauth2 import create_access_token
 from config.utils import hash_password, verify_password
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from models.token import Token
-from models.user import CreateUser, LoggedUserResponse, User, UserResponse
+from models.user import CreateUser, User, UserResponse
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 3600
 

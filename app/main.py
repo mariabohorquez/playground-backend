@@ -2,7 +2,7 @@ from config.db import Settings
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, character, user, worldbuilding, dialogue
+from routes import auth, character, dialogue, user, worldbuilding
 
 load_dotenv()
 settings = Settings()

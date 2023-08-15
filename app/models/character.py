@@ -3,6 +3,7 @@ from typing import List, Optional
 from beanie import Document, Indexed, PydanticObjectId
 from pydantic import BaseModel
 
+
 class Character(Document):
     name: Indexed(str, unique=True)
     description: str
@@ -68,5 +69,6 @@ class UserCharactersResponse(BaseModel):
     chars: List[dict]
     status: str = "success"
 
+
 class DeleteCharacterBody(BaseModel):
-    userId  : PydanticObjectId
+    userId: PydanticObjectId

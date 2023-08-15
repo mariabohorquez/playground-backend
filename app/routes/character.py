@@ -10,8 +10,9 @@ from fastapi import (APIRouter, Body, File, Form, HTTPException, UploadFile,
                      status)
 from fastapi.encoders import jsonable_encoder
 from models.character import (Character, CharacterDataResponse,
-                              CharacterResponse, DeleteCharacterBody, DeleteCharacterResponse,
-                              UpdateCharacter, UserCharactersResponse)
+                              CharacterResponse, DeleteCharacterBody,
+                              DeleteCharacterResponse, UpdateCharacter,
+                              UserCharactersResponse)
 from models.user import User
 
 load_dotenv()
@@ -35,7 +36,7 @@ async def create_character(
     name: Annotated[str, Form(default=...)],
     description: Annotated[str, Form(default=...)],
     traits: Annotated[str, Form(default=...)],
-    image: UploadFile = File(default=None)
+    image: UploadFile = File(default=None),
 ):
     user = await User.get(userId)
     if not user:
@@ -45,19 +46,18 @@ async def create_character(
         )
 
     img_url = ""
-    if (image != None):
-      try:
-        result = cloudinary.uploader.upload(
-            image.file,
-            folder="playground",
-        )
-      except Exception as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error uploading image: {error}",
-        )
-      img_url = result.get("url")
-
+    if image != None:
+        try:
+            result = cloudinary.uploader.upload(
+                image.file,
+                folder="playground",
+            )
+        except Exception as error:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error uploading image: {error}",
+            )
+        img_url = result.get("url")
 
     character = Character(
         name=name, description=description, traits=traits.split(","), image=img_url
@@ -138,7 +138,7 @@ async def update_character(
     response_description="Delete a character",
     response_model=DeleteCharacterResponse,
 )
-async def delete_character(characterId: PydanticObjectId, payload : DeleteCharacterBody):
+async def delete_character(characterId: PydanticObjectId, payload: DeleteCharacterBody):
     userId = payload.userId
     user = await User.get(userId)
 
