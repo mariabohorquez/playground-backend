@@ -84,7 +84,7 @@ class LoggedUserResponse(BaseModel):
 
 
 class UpdateWorldBuilding(BaseModel):
-    text: Optional[str]
+    text: str
 
 
 class UserResponse(UserBase):

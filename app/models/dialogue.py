@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Json
+from pydantic import BaseModel
 
 
 class DialogueResponse(BaseModel):
-    data: Json
-    status_code: int
+    lines: list[str]
