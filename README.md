@@ -34,3 +34,13 @@ Repositorio para el proyecto final de ingenieria.
 `make local && make install && make run`
 
 El servidor estara corriendo en: http://127.0.0.1:8000
+
+
+### Diagrama base de datos
+
+```mermaid
+erDiagram
+    USER ||--|{ CHARACTERS : creates
+    USER ||--|| WORLDBUILDING : sets
+    CHARACTERS ||--o{ DIALOGUE : generate
+```
