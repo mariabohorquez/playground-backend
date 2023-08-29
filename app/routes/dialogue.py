@@ -43,7 +43,7 @@ async def generate(
     model: str,
     character_id: str,
     additional_context: str = "",
-    number_of_lines : int = 3,
+    number_of_lines: int = 3,
 ):
     character = await Character.get(character_id)
     if not character:
@@ -54,7 +54,10 @@ async def generate(
 
     if model == "openai":
         response = get_openai_response(
-            current_user, character, number_of_lines=number_of_lines, additional_context=""
+            current_user,
+            character,
+            number_of_lines=number_of_lines,
+            additional_context="",
         )
 
     if model == "custom":
