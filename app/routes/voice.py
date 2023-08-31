@@ -38,7 +38,7 @@ def get_audio(
     current_user: Annotated[User, Depends(oauth2.get_current_user)],
     voice_id: str,
     dialogue: str,
-    voice_speed: float = 1,
+    voice_speed: float = 1.2,
 ):
     url = "https://app.coqui.ai/api/v2/samples/xtts/render/"
 
