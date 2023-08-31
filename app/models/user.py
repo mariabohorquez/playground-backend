@@ -74,15 +74,6 @@ class LoginUser(BaseModel):
     password: constr(min_length=8)
 
 
-class LoggedUserResponse(BaseModel):
-    id: str
-    name: str
-    email: str
-    photo: Optional[str]
-    characters: Optional[List[str]] = []
-    world_building: Optional[str] = ""
-
-
 class UpdateWorldBuilding(BaseModel):
     text: str
 

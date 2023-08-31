@@ -38,11 +38,11 @@ def get_audio(
     current_user: Annotated[User, Depends(oauth2.get_current_user)],
     voice_id: str,
     dialogue: str,
-    voice_speed: float = 1.2,
+    voice_speed: float = 1,
 ):
     url = "https://app.coqui.ai/api/v2/samples/xtts/render/"
 
-    payload = {"voice_id": f"{voice_id}", "text": f"{dialogue}", "speed": {voice_speed}}
+    payload = {"voice_id": f"{voice_id}", "text": f"{dialogue}", "speed": voice_speed}
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
