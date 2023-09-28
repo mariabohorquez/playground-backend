@@ -11,7 +11,7 @@ run:
 	cd app && uvicorn main:app --reload
 
 # Format code using black
-format:
+lint:
 	chmod +x format.sh && ./format.sh
 
 # Run unit tests using pytest

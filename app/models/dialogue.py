@@ -16,3 +16,8 @@ class SpeakersResponse(BaseModel):
 
 class VoiceResponse(BaseModel):
     url: str
+
+
+class FinetuningResponse(BaseModel):
+    response: str
+    status: str

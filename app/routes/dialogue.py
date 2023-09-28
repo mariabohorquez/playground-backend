@@ -2,12 +2,13 @@ import os
 from typing import Annotated
 
 import openai
+import replicate
 from config import oauth2
-from config.template import DIALOGUE_GENERATOR
+from config.template import DIALOGUE_GENERATOR, FINETUNE_PROMPT, SYSTEM_PROMPT
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.character import Character
-from models.dialogue import DialogueResponse
+from models.dialogue import DialogueResponse, FinetuningResponse
 from models.user import User
 
 router = APIRouter()
@@ -18,23 +19,31 @@ OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 openai.api_key = OPENAI_KEY
 
 
-def get_openai_response(current_user, character, number_of_lines, additional_context):
-    prompt = DIALOGUE_GENERATOR.format(
-        game_context=current_user.world_building,
-        character_name=character.name,
-        character_description=character.description,
-        additional_context=additional_context,
-        character_traits=", ".join(character.traits),
-        number_of_lines=number_of_lines,
-    )
+def get_openai_lines(prompt: str):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=100,
         temperature=0.8,
     )
-    print(response)
-    return response
+    return DialogueResponse(
+        lines=[
+            line
+            for line in response.choices[0].message.content.split("\n")
+            if line != ""
+        ]
+    )
+
+
+def get_llama_lines(prompt: str):
+    response = replicate.run(
+        "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+        input={"prompt": prompt, "system_prompt": SYSTEM_PROMPT, "max_new_tokens": 100},
+    )
+
+    response = [item for item in response if item != ""]
+    response = "".join(response).split("\n\n")
+    return DialogueResponse(lines=response)
 
 
 @router.get("/generate", response_model=DialogueResponse)
@@ -52,22 +61,58 @@ async def generate(
             detail=f"Character with id: {character_id} not found",
         )
 
+    prompt = DIALOGUE_GENERATOR.format(
+        game_context=current_user.world_building,
+        character_name=character.name,
+        character_description=character.description,
+        additional_context=additional_context,
+        character_traits=", ".join(character.traits),
+        number_of_lines=number_of_lines,
+    )
+
     if model == "openai":
-        response = get_openai_response(
-            current_user,
-            character,
-            number_of_lines=number_of_lines,
-            additional_context="",
-        )
+        response = get_openai_lines(prompt=prompt)
+    elif model == "llama":
+        response = get_llama_lines(prompt=prompt)
 
-    if model == "custom":
-        # TODO: Implement custom model
-        pass
+    return response
 
-    return DialogueResponse(
-        lines=[
-            line
-            for line in response.choices[0].message.content.split("\n")
-            if line != ""
-        ]
+
+def finetune_openai(prompt: str):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=100,
+        temperature=0.8,
+    )
+    return response
+
+
+def finetune_llama(prompt: str):
+    response = replicate.run(
+        "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+        input={"prompt": prompt, "system_prompt": SYSTEM_PROMPT, "max_new_tokens": 100},
+    )
+    return response
+
+
+@router.post("/Finetuning", response_model=FinetuningResponse)
+async def finetune(
+    current_user: Annotated[User, Depends(oauth2.get_current_user)],
+    model: str,
+    line: str,
+    liked: bool,
+):
+    prompt = FINETUNE_PROMPT.format(
+        line=line,
+        condition="generate" if liked else "avoid",
+    )
+
+    if model == "openai":
+        response = finetune_openai(prompt)
+    elif model == "llama":
+        response = finetune_llama(prompt)
+
+    return FinetuningResponse(
+        response=response.choices[0].message.content, status=status.HTTP_200_OK
     )
