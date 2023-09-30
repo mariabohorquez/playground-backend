@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from beanie import Document, Indexed, PydanticObjectId
@@ -9,6 +10,7 @@ class Character(Document):
     description: str
     traits: List[str]
     image: Optional[str] = None
+    last_update : datetime = datetime.now()
 
     class Settings:
         name = "characters"
@@ -38,6 +40,7 @@ class UpdateCharacter(BaseModel):
     description: Optional[str] = None
     traits: Optional[List[str]] = None
     image: Optional[str] = None
+    last_update : datetime = datetime.now()
 
     class Config:
         schema_extra = {
