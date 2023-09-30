@@ -20,18 +20,24 @@ openai.api_key = OPENAI_KEY
 
 
 def get_openai_lines(prompt: str):
+
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=100,
         temperature=0.8,
     )
+    lines = []
+
+    char1 = '"'
+    char2 = '"'
+
+    for line in response.choices[0].message.content.split("\n"):
+        if line != "":
+            lines.append(line)
+
     return DialogueResponse(
-        lines=[
-            line
-            for line in response.choices[0].message.content.split("\n")
-            if line != ""
-        ]
+        lines=lines
     )
 
 
