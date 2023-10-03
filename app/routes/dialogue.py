@@ -102,7 +102,7 @@ def finetune_llama(prompt: str):
     return response
 
 
-@router.post("/Finetuning", response_model=FinetuningResponse)
+@router.post("/finetuning", response_model=FinetuningResponse)
 async def finetune(
     current_user: Annotated[User, Depends(oauth2.get_current_user)],
     model: str,
