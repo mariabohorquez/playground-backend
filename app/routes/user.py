@@ -70,5 +70,5 @@ async def update_user(
     }
 
     result = await user.update(update_query)
-    parsed_user = jsonable_encoder(obj=user, exclude={"password", "characters"})
+    parsed_user = jsonable_encoder(obj=user, exclude={"world_building", "password", "characters"})
     return UpdateUserResponse(user=parsed_user)
