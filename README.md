@@ -4,7 +4,13 @@ Repositorio para el proyecto final de ingenieria.
 
 ## Backend
 
-## Windows Install Instructions
+###  Como correr en Linux/MacOS
+
+`make local && make install && make run`
+
+El servidor estara corriendo en: http://127.0.0.1:8000
+
+### Windows Install Instructions
   Create a virtual enviroment for Python with the following command in the repo folder
   
   `python -m venv .venv`
@@ -29,14 +35,7 @@ Repositorio para el proyecto final de ingenieria.
 
   `pip install -r requirements.txt`
 
-###  Como correr
-
-`make local && make install && make run`
-
-El servidor estara corriendo en: http://127.0.0.1:8000
-
-
-### Diagrama base de datos
+### Diagrama base de datos (MongoDB)
 
 ```mermaid
 erDiagram
