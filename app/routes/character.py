@@ -11,7 +11,7 @@ from fastapi import (APIRouter, Body, File, Form, HTTPException, UploadFile,
 from fastapi.encoders import jsonable_encoder
 from models.character import (Character, CharacterDataResponse,
                               CharacterResponse, DeleteCharacterBody,
-                              DeleteCharacterResponse, UpdateCharacter, UpdateCharacterLineFavorite, UpdateCharacterLineFavoriteResponse,
+                              DeleteCharacterResponse, ExportCharacterLinesResponse, UpdateCharacter, UpdateCharacterLineFavorite, UpdateCharacterLineFavoriteResponse,
                               UserCharactersResponse)
 from models.user import User
 
@@ -198,4 +198,30 @@ async def mark_favorite_line(characterId : PydanticObjectId, payload : UpdateCha
 
     return UpdateCharacterLineFavoriteResponse()
 
+
+@router.get(
+    "/export-dialogues/{userId}",
+    response_description="Get a Json File with all dialogues of characters",
+    response_model=ExportCharacterLinesResponse,
+)
+async def export_character_lines(userId : PydanticObjectId):
+    user = await User.find_one(User.id == userId, fetch_links=True)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {userId} not found",
+        )
+
+    lines = {}
+    for char in user.characters:
+        if len(char.favorite_dialogues) == 0:
+            continue
+        lines[char.name] = []
+        for line in char.favorite_dialogues:
+            lines[char.name].append(line)
+            
+
+    return ExportCharacterLinesResponse(status="success", lines=lines)    
+    
     

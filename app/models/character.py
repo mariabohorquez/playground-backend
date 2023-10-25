@@ -83,3 +83,7 @@ class UpdateCharacterLineFavorite(BaseModel):
 
 class UpdateCharacterLineFavoriteResponse(BaseModel):
     status : str = "success"
+
+class ExportCharacterLinesResponse(BaseModel):
+    status : str = "success"
+    lines : dict
