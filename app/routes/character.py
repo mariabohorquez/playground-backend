@@ -11,7 +11,7 @@ from fastapi import (APIRouter, Body, File, Form, HTTPException, UploadFile,
 from fastapi.encoders import jsonable_encoder
 from models.character import (Character, CharacterDataResponse,
                               CharacterResponse, DeleteCharacterBody,
-                              DeleteCharacterResponse, UpdateCharacter,
+                              DeleteCharacterResponse, UpdateCharacter, UpdateCharacterLineFavorite, UpdateCharacterLineFavoriteResponse,
                               UserCharactersResponse)
 from models.user import User
 
@@ -173,3 +173,29 @@ async def delete_character(characterId: PydanticObjectId, payload: DeleteCharact
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Error in delete character process",
     )
+
+@router.put(
+    "/{characterId}/favorite",
+    response_description="Mark a dialogue line as favorite",
+    response_model=UpdateCharacterLineFavoriteResponse
+)
+async def mark_favorite_line(characterId : PydanticObjectId, payload : UpdateCharacterLineFavorite):
+    character = await Character.get(characterId)
+
+    if not character:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Character with {characterId} not found",
+        )
+
+    update_query = ""
+    if payload.favorite:
+        update_query = { "$push" : {"favorite_dialogues" : payload.line} }
+    else:
+        update_query = {"$pull" : {"favorite_dialogues" : payload.line}}
+
+    await character.update(update_query)
+
+    return UpdateCharacterLineFavoriteResponse()
+
+    

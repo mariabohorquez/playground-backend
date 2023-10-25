@@ -11,6 +11,7 @@ class Character(Document):
     traits: List[str]
     image: Optional[str] = None
     last_update : datetime = datetime.now()
+    favorite_dialogues : List[str] = []
 
     class Settings:
         name = "characters"
@@ -75,3 +76,10 @@ class UserCharactersResponse(BaseModel):
 
 class DeleteCharacterBody(BaseModel):
     userId: PydanticObjectId
+
+class UpdateCharacterLineFavorite(BaseModel):
+    line : str
+    favorite : bool
+
+class UpdateCharacterLineFavoriteResponse(BaseModel):
+    status : str = "success"
