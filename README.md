@@ -1,41 +1,80 @@
-# playground
+# Playground
 
-Repositorio para el proyecto final de ingenieria.
+Welcome to the project repository for our final engineering project. This project has been developed using Python 3.11, FASTAPI, and Pip.
 
-## Backend
+## Getting Started
 
-###  Como correr en Linux/MacOS
+### Prerequisites
 
-`make local && make install && make run`
+Before you begin, make sure you have the following installed on your system:
 
-El servidor estara corriendo en: http://127.0.0.1:8000
+- Python 3.11
+- Python's virtual environment (venv)
+- Chocolatey (for Windows)
 
-### Windows Install Instructions
-  Create a virtual enviroment for Python with the following command in the repo folder
-  
-  `python -m venv .venv`
+### Setting Up the Environment
 
-  Activate the enviroment
+#### For Linux/MacOS
 
-  `.\venv\Scripts\Activate.ps1`
+1. Open your terminal.
+2. Clone this repository and navigate to the project folder:
 
-  Check if the enviroment was created successfuly with
+   ```bash
+   git clone https://github.com/mariabohorquez/playground-backend
+   cd playground-backend
+   ```
+   
+3. Create and activate a Python virtual environment:
 
-  `Get-Command pip`
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   make local && make install && make run
+   ```
+   
+5. The server will be running at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-  You will see an output like this
-  
-  `appDirectory\venv\Scripts\pip.exe`
+#### For Windows
 
-  Update your pip version before install the requirements
+1. Open your command prompt or PowerShell.
+2. Clone this repository and navigate to the project folder:
 
-  `python -m pip install --upgrade pip`
+   ```powershell
+   git clone https://github.com/mariabohorquez/playground-backend
+   cd playground-backend
+   ```
+   
+3. Install Chocolatey package manager following the [choco docs](https://chocolatey.org/install#individual).
+   
+4. Install the `make` package using Chocolatey:
 
-  As last step install the dependencies of aplication with:
+   ```powershell
+   choco install make
+   ```
 
-  `pip install -r requirements.txt`
+5. Create a virtual environment for Python in the project folder:
 
-### Diagrama base de datos (MongoDB)
+   ```powershell
+   python3 -m venv .venv
+   source .venv/bin/activate
+   make local && make install && make run
+   ```
+
+## Running the Project
+
+Now that you have set up the environment, you can start the project:
+
+1. Make sure your virtual environment is activated.
+
+2. Run the project with the following command:
+
+   ```bash
+   make run
+   ```
+
+4. The server will be accessible at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+## Database Diagram (MongoDB)
 
 ```mermaid
 erDiagram
