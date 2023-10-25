@@ -1,4 +1,4 @@
-# Playground
+# Playground (Back)
 
 Welcome to the project repository for our final engineering project. This project has been developed using Python 3.11, FASTAPI, and Pip.
 
