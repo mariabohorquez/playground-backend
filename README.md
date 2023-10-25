@@ -74,6 +74,10 @@ Now that you have set up the environment, you can start the project:
 
 4. The server will be accessible at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
+## Deployment 
+
+Deployment is done automatically when a new release is generated via Github.
+
 ## Database Diagram (MongoDB)
 
 ```mermaid
