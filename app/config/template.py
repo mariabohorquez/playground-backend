@@ -4,12 +4,7 @@ With the following game context:
 Taking into account that you are the following character:
 Name is {character_name}, description is {character_description}.
 Give me some videogame bites that character would say in {additional_context}, taking into account this character is {character_traits}.
-I need {number_of_lines} as maximum amount of lines. The output format should be something like this:
-
-- $Content of Line
-- $Content of Line
-
-until not more lines rest, remember that "$Content of Line"  is just the string value
+I need {number_of_lines} as maximum amount of lines. The output format should be no introduction, just the lines separated by a new line.
 """
 
 FINETUNE_PROMPT = """

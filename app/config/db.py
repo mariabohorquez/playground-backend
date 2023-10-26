@@ -22,6 +22,7 @@ class Settings(BaseSettings):
             return client
         except Exception as error:
             print(f"Unable to connect to the MongoDB server with error: {error}.")
+            raise error
 
     class Config:
         env_file = ".env"

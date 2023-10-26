@@ -1,8 +1,8 @@
-# Variables
-APP_NAME = playground
-APP_VERSION = v0.1.0
-
 # Install project dependencies
+local:
+	chmod +x local_setup.sh && ./local_setup.sh
+
+
 install:
 	pip install -r requirements.txt
 
@@ -19,4 +19,4 @@ test:
 	pytest tests/
 
 # Phony targets
-.PHONY: install run format test local
+.PHONY: install run lint test local

@@ -45,8 +45,7 @@ async def startup_db_client():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    # await app.mongodb_client.close()
-    pass
+    app.mongodb_client.close()
 
 
 # default routes
