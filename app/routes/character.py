@@ -17,6 +17,7 @@ from models.character import (Character, CharacterDataResponse,
                               ExportCharacterLinesResponse, UpdateCharacter,
                               UpdateCharacterLineFavoriteResponse,
                               UserCharactersResponse)
+from models.training import DialogueTraining
 from models.user import User
 
 load_dotenv()
