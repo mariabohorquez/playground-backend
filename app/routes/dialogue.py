@@ -29,7 +29,7 @@ def get_openai_lines(prompt: str):
         temperature=0.8,
     )
 
-    lines = [re.sub(r"[^a-zA-Z0-9 ']", '', item.strip()) for item in response.choices[0].message.content.split("\n") if item != ""]
+    lines = [re.sub(r"[^a-zA-Z0-9 '.]", '', item.strip()) for item in response.choices[0].message.content.split("\n") if item != ""]
 
     return DialogueResponse(
         lines=lines
@@ -45,7 +45,7 @@ def get_llama_lines(prompt: str):
     response = [item for item in response if item != ""]
     response = "".join(response).split("\n")
     # Llama needs some cleaning up for the response, very difficult to remove via prompt.
-    response = [re.sub(r"[^a-zA-Z0-9 ']", '', item[2:].strip()) for item in response if item != ""]
+    response = [re.sub(r"[^a-zA-Z0-9 '.]", '', item[2:].strip()) for item in response if item != ""]
     response.pop(0) 
     return DialogueResponse(lines=response)
 
