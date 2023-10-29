@@ -77,10 +77,6 @@ class UserCharactersResponse(BaseModel):
 class DeleteCharacterBody(BaseModel):
     userId: PydanticObjectId
 
-class UpdateCharacterLineFavorite(BaseModel):
-    line : str
-    favorite : bool
-
 class UpdateCharacterLineFavoriteResponse(BaseModel):
     status : str = "success"
 

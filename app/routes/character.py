@@ -1,18 +1,22 @@
 # Image packages
 import os
 from typing import Annotated
+from click import prompt
 
 import cloudinary
 import cloudinary.uploader
 from beanie import PydanticObjectId
 from dotenv import load_dotenv
-from fastapi import (APIRouter, Body, File, Form, HTTPException, UploadFile,
+from fastapi import (APIRouter, Body, Depends, File, Form, HTTPException, UploadFile,
                      status)
 from fastapi.encoders import jsonable_encoder
+from config import oauth2
+from config.template import TRAINING_GENERATOR
 from models.character import (Character, CharacterDataResponse,
                               CharacterResponse, DeleteCharacterBody,
-                              DeleteCharacterResponse, ExportCharacterLinesResponse, UpdateCharacter, UpdateCharacterLineFavorite, UpdateCharacterLineFavoriteResponse,
+                              DeleteCharacterResponse, ExportCharacterLinesResponse, UpdateCharacter, UpdateCharacterLineFavoriteResponse,
                               UserCharactersResponse)
+from models.dataset_dialogues import DialogueTraining
 from models.user import User
 
 load_dotenv()
@@ -174,27 +178,52 @@ async def delete_character(characterId: PydanticObjectId, payload: DeleteCharact
         detail="Error in delete character process",
     )
 
-@router.put(
-    "/{characterId}/favorite",
+@router.post(
+    "/favorite",
     response_description="Mark a dialogue line as favorite",
     response_model=UpdateCharacterLineFavoriteResponse
 )
-async def mark_favorite_line(characterId : PydanticObjectId, payload : UpdateCharacterLineFavorite):
-    character = await Character.get(characterId)
+async def mark_favorite( 
+    current_user: Annotated[User, Depends(oauth2.get_current_user)],
+    character_id: str,
+    favorite : bool,
+    line : str,
+    additional_context: str = ""):
+
+    character = await Character.get(character_id)
 
     if not character:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Character with {characterId} not found",
+            detail=f"Character with {character_id} not found",
         )
 
     update_query = ""
-    if payload.favorite:
-        update_query = { "$push" : {"favorite_dialogues" : payload.line} }
+    if favorite:
+        update_query = { "$push" : {"favorite_dialogues" : line} }
     else:
-        update_query = {"$pull" : {"favorite_dialogues" : payload.line}}
+        update_query = {"$pull" : {"favorite_dialogues" : line}}
 
     await character.update(update_query)
+
+    # Data set store values
+    training_prompt = TRAINING_GENERATOR.format(
+        game_context = current_user.world_building,
+        character_name = character.name,
+        character_description = character.description,
+        character_traits = character.traits,
+        additional_context = additional_context,
+    )
+
+    if favorite:
+      prompt_hash = hash(training_prompt)
+      dataset_row = await DialogueTraining.find_by_hash(prompt_hash)
+
+      if not dataset_row:
+          dataset_row = DialogueTraining(prompt=training_prompt, lines=[line])
+          await dataset_row.create()
+      else:
+          await dataset_row.update({"$push" : {"lines" : line}})
 
     return UpdateCharacterLineFavoriteResponse()
 

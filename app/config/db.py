@@ -3,6 +3,7 @@ import os
 from beanie import init_beanie
 from dotenv import load_dotenv
 from models.character import Character
+from models.dataset_dialogues import DialogueTraining
 from models.user import User
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseSettings
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
             conn = await client.server_info()
             print(f'Connected to MongoDB {conn.get("version")}')
             await init_beanie(
-                database=client["playground"], document_models=[Character, User]
+                database=client["playground"], document_models=[Character, User, DialogueTraining]
             )
             return client
         except Exception as error:

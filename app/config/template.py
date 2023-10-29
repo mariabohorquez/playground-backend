@@ -7,6 +7,14 @@ Give me some videogame bites that character would say in {additional_context}, t
 I need {number_of_lines} as maximum amount of lines. The output format should be no introduction, just the lines separated by a new line.
 """
 
+TRAINING_GENERATOR = """
+With the following game context:
+{game_context}.
+Taking into account that you are the following character:
+Name is {character_name}, description is {character_description}.
+Give me one videogame bite that character would say in {additional_context}, taking into account this character is {character_traits}.
+"""
+
 FINETUNE_PROMPT = """
 For the line: {line}.
 Next time {condition} more lines like that.
