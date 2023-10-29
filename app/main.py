@@ -2,7 +2,8 @@ from config.db import Settings
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, character, dialogue, user, voice, worldbuilding
+from routes import (auth, character, dialogue, training, user, voice,
+                    worldbuilding)
 
 load_dotenv()
 settings = Settings()
@@ -34,6 +35,7 @@ app.include_router(
 )
 app.include_router(dialogue.router, prefix="/dialogue", tags=["dialogue"])
 app.include_router(voice.router, prefix="/voice", tags=["voice"])
+app.include_router(training.router, prefix="/training", tags=["training"])
 
 
 # events

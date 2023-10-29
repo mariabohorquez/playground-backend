@@ -89,7 +89,7 @@ async def generate(
 
 def finetune_openai(prompt: str):
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="ft:gpt-3.5-turbo-0613:personal::8F8iyZbq",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=100,
         temperature=0.8,
