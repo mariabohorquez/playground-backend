@@ -18,7 +18,8 @@ class Settings(BaseSettings):
             conn = await client.server_info()
             print(f'Connected to MongoDB {conn.get("version")}')
             await init_beanie(
-                database=client["playground"], document_models=[Character, User, DialogueTraining]
+                database=client["playground"],
+                document_models=[Character, User, DialogueTraining],
             )
             return client
         except Exception as error:

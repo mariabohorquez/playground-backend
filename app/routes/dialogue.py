@@ -1,8 +1,8 @@
 import os
 from typing import Annotated
-import regex as re
 
 import openai
+import regex as re
 import replicate
 from config import oauth2
 from config.template import DIALOGUE_GENERATOR, FINETUNE_PROMPT, SYSTEM_PROMPT
@@ -21,7 +21,6 @@ openai.api_key = OPENAI_KEY
 
 
 def get_openai_lines(prompt: str):
-
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
@@ -29,11 +28,13 @@ def get_openai_lines(prompt: str):
         temperature=0.8,
     )
 
-    lines = [re.sub(r"[^a-zA-Z0-9 '.,]", '', item.strip()) for item in response.choices[0].message.content.split("\n") if item != ""]
+    lines = [
+        re.sub(r"[^a-zA-Z0-9 '.,]", "", item.strip())
+        for item in response.choices[0].message.content.split("\n")
+        if item != ""
+    ]
 
-    return DialogueResponse(
-        lines=lines
-    )
+    return DialogueResponse(lines=lines)
 
 
 def get_llama_lines(prompt: str):
@@ -45,8 +46,12 @@ def get_llama_lines(prompt: str):
     response = [item for item in response if item != ""]
     response = "".join(response).split("\n")
     # Llama needs some cleaning up for the response, very difficult to remove via prompt.
-    response = [re.sub(r"[^a-zA-Z0-9 '.,]", '', item[2:].strip()) for item in response if item != ""]
-    response.pop(0) 
+    response = [
+        re.sub(r"[^a-zA-Z0-9 '.,]", "", item[2:].strip())
+        for item in response
+        if item != ""
+    ]
+    response.pop(0)
     return DialogueResponse(lines=response)
 
 

@@ -1,17 +1,15 @@
 import os
-from dotenv import load_dotenv
 from typing import Annotated
-from beanie import PydanticObjectId
-from fastapi.encoders import jsonable_encoder
-import config.oauth2 as oauth2
-from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile, status
-from models.character import CharacterResponse
-from models.user import UpdateUser, UpdateUserResponse, User, WorldBuildingResponse
 
 import cloudinary
 import cloudinary.uploader
-
-from routes import worldbuilding
+import config.oauth2 as oauth2
+from beanie import PydanticObjectId
+from dotenv import load_dotenv
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, UploadFile,
+                     status)
+from fastapi.encoders import jsonable_encoder
+from models.user import UpdateUserResponse, User
 
 load_dotenv()
 
@@ -28,6 +26,7 @@ router = APIRouter()
 def get_me(current_user: Annotated[User, Depends(oauth2.get_current_user)]):
     print(current_user.__dict__)
     return current_user
+
 
 @router.put(
     "/update",
@@ -63,12 +62,14 @@ async def update_user(
         img_url = result.get("url")
 
     update_query = {
-        "$set" : {
-            "name" : name,
-            "photo" : img_url if img_url != "" else user.photo,
+        "$set": {
+            "name": name,
+            "photo": img_url if img_url != "" else user.photo,
         }
     }
 
     result = await user.update(update_query)
-    parsed_user = jsonable_encoder(obj=user, exclude={"world_building", "password", "characters"})
+    parsed_user = jsonable_encoder(
+        obj=user, exclude={"world_building", "password", "characters"}
+    )
     return UpdateUserResponse(user=parsed_user)

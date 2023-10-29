@@ -77,9 +77,11 @@ class LoginUser(BaseModel):
 class UpdateWorldBuilding(BaseModel):
     text: str
 
+
 class UpdateUserResponse(BaseModel):
-    user : dict
-    status : str = "success"
+    user: dict
+    status: str = "success"
+
 
 class UserResponse(UserBase):
     id: PydanticObjectId

@@ -10,8 +10,8 @@ class Character(Document):
     description: str
     traits: List[str]
     image: Optional[str] = None
-    last_update : datetime = datetime.now()
-    favorite_dialogues : List[str] = []
+    last_update: datetime = datetime.now()
+    favorite_dialogues: List[str] = []
 
     class Settings:
         name = "characters"
@@ -41,7 +41,7 @@ class UpdateCharacter(BaseModel):
     description: Optional[str] = None
     traits: Optional[List[str]] = None
     image: Optional[str] = None
-    last_update : datetime = datetime.now()
+    last_update: datetime = datetime.now()
 
     class Config:
         schema_extra = {
@@ -77,9 +77,11 @@ class UserCharactersResponse(BaseModel):
 class DeleteCharacterBody(BaseModel):
     userId: PydanticObjectId
 
+
 class UpdateCharacterLineFavoriteResponse(BaseModel):
-    status : str = "success"
+    status: str = "success"
+
 
 class ExportCharacterLinesResponse(BaseModel):
-    status : str = "success"
-    lines : dict
+    status: str = "success"
+    lines: dict

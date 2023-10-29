@@ -1,20 +1,21 @@
 # Image packages
 import os
 from typing import Annotated
-from click import prompt
 
 import cloudinary
 import cloudinary.uploader
 from beanie import PydanticObjectId
-from dotenv import load_dotenv
-from fastapi import (APIRouter, Body, Depends, File, Form, HTTPException, UploadFile,
-                     status)
-from fastapi.encoders import jsonable_encoder
 from config import oauth2
 from config.template import TRAINING_GENERATOR
+from dotenv import load_dotenv
+from fastapi import (APIRouter, Body, Depends, File, Form, HTTPException,
+                     UploadFile, status)
+from fastapi.encoders import jsonable_encoder
 from models.character import (Character, CharacterDataResponse,
                               CharacterResponse, DeleteCharacterBody,
-                              DeleteCharacterResponse, ExportCharacterLinesResponse, UpdateCharacter, UpdateCharacterLineFavoriteResponse,
+                              DeleteCharacterResponse,
+                              ExportCharacterLinesResponse, UpdateCharacter,
+                              UpdateCharacterLineFavoriteResponse,
                               UserCharactersResponse)
 from models.dataset_dialogues import DialogueTraining
 from models.user import User
@@ -178,18 +179,19 @@ async def delete_character(characterId: PydanticObjectId, payload: DeleteCharact
         detail="Error in delete character process",
     )
 
+
 @router.post(
     "/favorite",
     response_description="Mark a dialogue line as favorite",
-    response_model=UpdateCharacterLineFavoriteResponse
+    response_model=UpdateCharacterLineFavoriteResponse,
 )
-async def mark_favorite( 
+async def mark_favorite(
     current_user: Annotated[User, Depends(oauth2.get_current_user)],
     character_id: str,
-    favorite : bool,
-    line : str,
-    additional_context: str = ""):
-
+    favorite: bool,
+    line: str,
+    additional_context: str = "",
+):
     character = await Character.get(character_id)
 
     if not character:
@@ -200,30 +202,30 @@ async def mark_favorite(
 
     update_query = ""
     if favorite:
-        update_query = { "$push" : {"favorite_dialogues" : line} }
+        update_query = {"$push": {"favorite_dialogues": line}}
     else:
-        update_query = {"$pull" : {"favorite_dialogues" : line}}
+        update_query = {"$pull": {"favorite_dialogues": line}}
 
     await character.update(update_query)
 
     # Data set store values
     training_prompt = TRAINING_GENERATOR.format(
-        game_context = current_user.world_building,
-        character_name = character.name,
-        character_description = character.description,
-        character_traits = character.traits,
-        additional_context = additional_context,
+        game_context=current_user.world_building,
+        character_name=character.name,
+        character_description=character.description,
+        character_traits=character.traits,
+        additional_context=additional_context,
     )
 
     if favorite:
-      prompt_hash = hash(training_prompt)
-      dataset_row = await DialogueTraining.find_by_hash(prompt_hash)
+        prompt_hash = hash(training_prompt)
+        dataset_row = await DialogueTraining.find_by_hash(prompt_hash)
 
-      if not dataset_row:
-          dataset_row = DialogueTraining(prompt=training_prompt, lines=[line])
-          await dataset_row.create()
-      else:
-          await dataset_row.update({"$push" : {"lines" : line}})
+        if not dataset_row:
+            dataset_row = DialogueTraining(prompt=training_prompt, lines=[line])
+            await dataset_row.create()
+        else:
+            await dataset_row.update({"$push": {"lines": line}})
 
     return UpdateCharacterLineFavoriteResponse()
 
@@ -233,7 +235,7 @@ async def mark_favorite(
     response_description="Get a Json File with all dialogues of characters",
     response_model=ExportCharacterLinesResponse,
 )
-async def export_character_lines(userId : PydanticObjectId):
+async def export_character_lines(userId: PydanticObjectId):
     user = await User.find_one(User.id == userId, fetch_links=True)
 
     if not user:
@@ -249,8 +251,5 @@ async def export_character_lines(userId : PydanticObjectId):
         lines[char.name] = []
         for line in char.favorite_dialogues:
             lines[char.name].append(line)
-            
 
-    return ExportCharacterLinesResponse(status="success", lines=lines)    
-    
-    
+    return ExportCharacterLinesResponse(status="success", lines=lines)
