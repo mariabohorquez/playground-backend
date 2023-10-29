@@ -1,6 +1,6 @@
 # Playground (Back)
 
-Welcome to the project repository for our final engineering project. This project has been developed using Python 3.11, FASTAPI, and Pip.
+Welcome to the project repository for our final engineering project. This project has been developed using Python 3.10, FASTAPI, and Pip.
 
 ## Getting Started
 
@@ -8,7 +8,7 @@ Welcome to the project repository for our final engineering project. This projec
 
 Before you begin, make sure you have the following installed on your system:
 
-- Python 3.11
+- Python 3.10
 - Python's virtual environment (venv)
 - Chocolatey (for Windows)
 
