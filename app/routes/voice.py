@@ -15,7 +15,7 @@ router = APIRouter()
 load_dotenv()
 
 ELEVEN_LABS_API_KEY = os.environ.get("ELEVEN_LABS_API_KEY")
-AUDIO_DIR = "audio_files"
+AUDIO_DIR = "audio"
 
 
 @router.get("/speakers", response_model=SpeakersResponse)
