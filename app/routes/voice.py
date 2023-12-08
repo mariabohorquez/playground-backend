@@ -53,6 +53,9 @@ def get_audio(
 
     response = requests.post(url, json=payload, headers=headers)
 
+    if not os.path.exists(AUDIO_DIR):
+        os.makedirs(AUDIO_DIR)
+
     file_path = f"{AUDIO_DIR}/{uuid.uuid4()}.mp3"  # Change 'output.mp3' to a unique name if needed
     with open(file_path, "wb") as f:
         for chunk in response.iter_content(chunk_size=128):
