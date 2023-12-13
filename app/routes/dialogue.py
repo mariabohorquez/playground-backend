@@ -29,7 +29,7 @@ def get_openai_lines(prompt: str):
     )
 
     lines = [
-        re.sub(r"[^a-zA-Z '.,]", "", item.strip())
+        re.sub(r"[^a-zA-Z '.,]", "", item.strip())[1:] if item.startswith('.') else re.sub(r"[^a-zA-Z '.,]", "", item.strip())
         for item in response.choices[0].message.content.split("\n")
         if item != ""
     ]
